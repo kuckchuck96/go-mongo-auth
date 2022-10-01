@@ -1,0 +1,14 @@
+app:
+    name: go-messenger
+    port: 8080
+
+jwt:
+    signing-key: ${SECRET_KEY}
+    auth:
+        expiry: ${TOKEN_EXPIRY}
+
+mongo:
+    uri: ${MONGO_URI}
+    database: ${DATABASE_NAME}
+    timeout: ${CONNECTION_TIMEOUT}
+    
