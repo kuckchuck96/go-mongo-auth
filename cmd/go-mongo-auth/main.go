@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"go-mongo-auth/configs"
-	"go-mongo-auth/internal/controller"
 	"go-mongo-auth/internal/database"
 	"go-mongo-auth/internal/middleware"
+	"go-mongo-auth/internal/route"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -27,11 +27,11 @@ func main() {
 	engine := gin.Default()
 	engine.Use(middleware.RequestValidation())
 
+	// Init mongo
 	database.ConnectionManager()
 
-	group := engine.Group("/api/v1")
-	group.POST("/login", controller.Login)
-	group.POST("/register", controller.Register)
+	// Configure routes
+	route.AddRoutes(engine)
 
 	engine.Run(fmt.Sprintf(":%v", configs.Get("app.port")))
 }
