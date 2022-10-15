@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	"go-mongo-auth/configs"
+	"go-mongo-auth/internal/config"
 	"log"
 	"time"
 
@@ -13,32 +13,34 @@ import (
 
 var MongoClient *mongo.Client
 
-func ConnectionManager() {
-	client, err := mongo.NewClient(options.Client().ApplyURI(configs.Get("mongo.uri")))
+func ConnectionManager() error {
+	client, err := mongo.NewClient(options.Client().ApplyURI(config.Get("mongo.uri")))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), configs.GetChrono("mongo.timeout"))
+	ctx, cancel := context.WithTimeout(context.Background(), config.GetChrono("mongo.timeout"))
 	defer cancel()
 
 	err = client.Connect(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// ping data base
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	log.Println("Mongo client created.")
 	MongoClient = client
+
+	return nil
 }
 
 func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
-	collection := client.Database(configs.Get("mongo.database")).Collection(collectionName)
+	collection := client.Database(config.Get("mongo.database")).Collection(collectionName)
 	return collection
 }
 

@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"go-mongo-auth/configs"
+	"go-mongo-auth/internal/config"
 	"log"
 	"time"
 
@@ -33,14 +33,14 @@ func createClaims(o any, expiry time.Duration) CustomClaims {
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiry)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    configs.Get("app.name"),
+			Issuer:    config.Get("app.name"),
 		},
 	}
 }
 
 func ValidateToken(tokenString string) (any, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(t *jwt.Token) (any, error) {
-		return []byte(configs.Get("jwt.signing-key")), nil
+		return []byte(config.Get("jwt.signing-key")), nil
 	})
 
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {

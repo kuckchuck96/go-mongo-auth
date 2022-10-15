@@ -7,4 +7,4 @@
 go.sum
 
 # Local configs
-*-dev.yaml
+*dev.yaml

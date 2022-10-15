@@ -2,36 +2,31 @@ package main
 
 import (
 	"fmt"
-	"go-mongo-auth/configs"
+	"go-mongo-auth/internal/config"
 	"go-mongo-auth/internal/database"
 	"go-mongo-auth/internal/middleware"
 	"go-mongo-auth/internal/route"
-	"os"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
 
-func init() {
-	var args string
-
-	if len(os.Args) > 1 {
-		args = os.Args[1]
-	} else {
-		args = ""
+func main() {
+	// Load configs
+	if err := config.Load(); err != nil {
+		log.Fatalln(err)
 	}
 
-	configs.Load(args)
-}
-
-func main() {
 	engine := gin.Default()
 	engine.Use(middleware.RequestValidation())
 
 	// Init mongo
-	database.ConnectionManager()
+	if err := database.ConnectionManager(); err != nil {
+		log.Fatalln(err)
+	}
 
 	// Configure routes
 	route.AddRoutes(engine)
 
-	engine.Run(fmt.Sprintf(":%v", configs.Get("app.port")))
+	engine.Run(fmt.Sprintf(":%v", config.Get("app.port")))
 }
