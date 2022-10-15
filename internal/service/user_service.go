@@ -2,7 +2,7 @@ package service
 
 import (
 	"fmt"
-	"go-mongo-auth/configs"
+	"go-mongo-auth/internal/config"
 	"go-mongo-auth/internal/database"
 	"go-mongo-auth/internal/jwt"
 	"go-mongo-auth/internal/util"
@@ -49,7 +49,7 @@ func Authenticate(login Login) (map[string]any, error) {
 		return nil, err
 	}
 
-	ss, err := jwt.CreateToken(user, configs.GetChrono("jwt.auth.expiry"))
+	ss, err := jwt.CreateToken(user, config.GetChrono("jwt.auth.expiry"))
 	if err != nil {
 		log.Println("Error creating JWT.", err)
 		return nil, err
