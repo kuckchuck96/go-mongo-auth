@@ -49,34 +49,6 @@ func NewMongoClient(config config.Config) (IMongoClient, error) {
 	}, nil
 }
 
-// var MongoClient *mongo.Client
-
-// func ConnectionManager() error {
-// 	client, err := mongo.NewClient(options.Client().ApplyURI(config.Get("mongo.uri")))
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	ctx, cancel := context.WithTimeout(context.Background(), config.GetChrono("mongo.timeout"))
-// 	defer cancel()
-
-// 	err = client.Connect(ctx)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	// ping data base
-// 	err = client.Ping(ctx, nil)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	log.Println("Mongo client created.")
-// 	MongoClient = client
-
-// 	return nil
-// }
-
 func (c *MongoClient) GetCollection(collectionName string) *mongo.Collection {
 	collection := c.Client.Database(c.Config.Mongo.Database).Collection(collectionName)
 	return collection
