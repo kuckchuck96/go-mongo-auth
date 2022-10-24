@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"go-mongo-auth/internal/jwt"
 	"log"
 	"net/http"
 	"strings"
@@ -19,11 +18,11 @@ type InvalidRequest struct {
 	Message string `json:"message"`
 }
 
-var exclude = []string{"/login", "/register"}
+var _exclude = []string{"/login", "/register"}
 
-func RequestValidation() gin.HandlerFunc {
+func requestValidation(m *Middleware) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		for _, e := range exclude {
+		for _, e := range _exclude {
 			if strings.HasSuffix(ctx.Request.RequestURI, e) {
 				return
 			}
@@ -43,7 +42,7 @@ func RequestValidation() gin.HandlerFunc {
 		// Extract token and validate
 		token := strings.Split(headers.Authorization, " ")[1]
 
-		entity, err := jwt.ValidateToken(token)
+		entity, err := m.Jwt.ValidateToken(token)
 		if err != nil || entity == nil {
 			log.Println("Error validating token.", err)
 			ctx.JSON(http.StatusUnauthorized, InvalidRequest{

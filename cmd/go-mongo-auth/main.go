@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-mongo-auth/internal/config"
 	"go-mongo-auth/internal/database"
+	"go-mongo-auth/internal/jwt"
 	"go-mongo-auth/internal/middleware"
 	"go-mongo-auth/internal/route"
 	"log"
@@ -12,21 +13,29 @@ import (
 )
 
 func main() {
-	// Load configs
-	if err := config.Load(); err != nil {
+	config, err := config.NewConfig()
+	if err != nil {
 		log.Fatalln(err)
 	}
 
 	engine := gin.Default()
-	engine.Use(middleware.RequestValidation())
+
+	// Jwt token
+	jwt := jwt.NewJwtToken(config)
+
+	// Configure Middlewares
+	middleware.NewMiddleware(engine, jwt).AddMiddlewares()
 
 	// Init mongo
-	if err := database.ConnectionManager(); err != nil {
+	mongo, err := database.NewMongoClient(config)
+	if err != nil {
 		log.Fatalln(err)
 	}
 
 	// Configure routes
-	route.AddRoutes(engine)
+	route.NewRoute(engine, config, jwt, mongo).AddRoutes()
 
-	engine.Run(fmt.Sprintf(":%v", config.Get("app.port")))
+	if err := engine.Run(fmt.Sprintf(":%v", config.App.Port)); err != nil {
+		log.Fatalln(err)
+	}
 }

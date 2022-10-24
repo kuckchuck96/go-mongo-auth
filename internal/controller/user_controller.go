@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"go-mongo-auth/internal/config"
+	"go-mongo-auth/internal/database"
+	"go-mongo-auth/internal/jwt"
 	"go-mongo-auth/internal/service"
 	"log"
 	"net/http"
@@ -8,7 +11,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Login(ctx *gin.Context) {
+type (
+	IUserController interface {
+		Login(*gin.Context)
+		Register(*gin.Context)
+	}
+
+	UserController struct {
+		Service service.IUserService
+	}
+)
+
+func NewUserController(config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IUserController {
+	return &UserController{
+		service.NewUserService(config, jwt, mongoClient),
+	}
+}
+
+func (c *UserController) Login(ctx *gin.Context) {
 	var login service.Login
 
 	if err := ctx.ShouldBindJSON(&login); err != nil {
@@ -19,7 +39,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	res, err := service.Authenticate(login)
+	res, err := c.Service.Authenticate(login)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -31,9 +51,8 @@ func Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func Register(ctx *gin.Context) {
+func (c *UserController) Register(ctx *gin.Context) {
 	var req service.User
-	req.New()
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		log.Println("Unable to bind request body.", err)
@@ -43,7 +62,7 @@ func Register(ctx *gin.Context) {
 		return
 	}
 
-	res, err := service.Register(req)
+	res, err := c.Service.Register(req)
 	if err != nil {
 		log.Println("Unable to create new user.", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{

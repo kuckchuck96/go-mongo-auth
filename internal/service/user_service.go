@@ -14,6 +14,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type (
+	IUserService interface {
+		Authenticate(Login) (map[string]any, error)
+		Register(User) (*mongo.InsertOneResult, error)
+	}
+
+	UserService struct {
+		Config      config.Config
+		Jwt         jwt.IJwtToken
+		MongoClient database.IMongoClient
+	}
+)
+
 type Login struct {
 	Email    string `form:"email" json:"email" binding:"email,required"`
 	Password string `form:"password" json:"password" binding:"required"`
@@ -30,18 +43,21 @@ type User struct {
 }
 
 const (
-	userCollection = "user"
+	_userCollection = "user"
 )
 
-func (user *User) New() {
-	user.CreatedAt = time.Now()
-	user.UpdatedAt = time.Now()
+func NewUserService(config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IUserService {
+	return &UserService{
+		Config:      config,
+		Jwt:         jwt,
+		MongoClient: mongoClient,
+	}
 }
 
-func Authenticate(login Login) (map[string]any, error) {
+func (s *UserService) Authenticate(login Login) (map[string]any, error) {
 	login.Password = util.EncodeString(login.Password)
 
-	res := database.FindOneDocument(userCollection, bson.M{"email": login.Email, "password": login.Password})
+	res := s.MongoClient.FindOneDocument(_userCollection, bson.M{"email": login.Email, "password": login.Password})
 
 	var user User
 	if err := res.Decode(&user); err != nil {
@@ -49,7 +65,7 @@ func Authenticate(login Login) (map[string]any, error) {
 		return nil, err
 	}
 
-	ss, err := jwt.CreateToken(user, config.GetChrono("jwt.auth.expiry"))
+	ss, err := s.Jwt.CreateToken(user, s.Config.Jwt.Auth.Expiry)
 	if err != nil {
 		log.Println("Error creating JWT.", err)
 		return nil, err
@@ -63,9 +79,13 @@ func Authenticate(login Login) (map[string]any, error) {
 	}, nil
 }
 
-func Register(user User) (*mongo.InsertOneResult, error) {
+func (s *UserService) Register(user User) (*mongo.InsertOneResult, error) {
+	// Default attribute values
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+
 	// Check for existing users by email
-	exists := database.FindOneDocument(userCollection, bson.M{"email": user.Email})
+	exists := s.MongoClient.FindOneDocument(_userCollection, bson.M{"email": user.Email})
 
 	if exists.Err() == nil {
 		return nil, fmt.Errorf("existing document found with email: '%v'", user.Email)
@@ -73,7 +93,7 @@ func Register(user User) (*mongo.InsertOneResult, error) {
 
 	user.Password = util.EncodeString(user.Password)
 
-	res, err := database.CreateOneDocument(userCollection, user)
+	res, err := s.MongoClient.CreateOneDocument(_userCollection, user)
 	if err != nil {
 		return nil, err
 	}
