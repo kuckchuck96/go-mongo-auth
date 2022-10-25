@@ -1,5 +1,6 @@
 app:
-    name: go-messenger
+    name: go-mongo-auth
+    env: prod
     port: 8080
 
 jwt:
