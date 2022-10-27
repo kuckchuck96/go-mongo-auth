@@ -11,72 +11,102 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Login struct {
-	Email    string `form:"email" json:"email" binding:"email,required"`
-	Password string `form:"password" json:"password" binding:"required"`
-}
+type (
+	IUserService interface {
+		Authenticate(Login) (AuthenticatedResponse, error)
+		Register(User) (RegisteredResponse, error)
+	}
 
-type User struct {
-	Id        primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Name      string             `json:"name" binding:"required"`
-	Email     string             `json:"email" binding:"email,required"`
-	Password  string             `json:"password,omitempty" binding:"required"`
-	Verified  bool               `json:"verified" bson:"verified" default:"false"`
-	CreatedAt time.Time          `json:"created" bson:"createdAt"`
-	UpdatedAt time.Time          `json:"updated" bson:"updatedAt"`
-}
+	UserService struct {
+		Config      config.Config
+		Jwt         jwt.IJwtToken
+		MongoClient database.IMongoClient
+	}
 
-const (
-	userCollection = "user"
+	Login struct {
+		Email    string `form:"email" json:"email" binding:"email,required"`
+		Password string `form:"password" json:"password" binding:"required"`
+	}
+
+	User struct {
+		Id        primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+		Name      string             `json:"name" binding:"required"`
+		Email     string             `json:"email" binding:"email,required"`
+		Password  string             `json:"password,omitempty" binding:"required"`
+		Verified  bool               `json:"verified" bson:"verified" default:"false"`
+		CreatedAt time.Time          `json:"created" bson:"createdAt"`
+		UpdatedAt time.Time          `json:"updated" bson:"updatedAt"`
+	}
+
+	AuthenticatedResponse struct {
+		User  User   `json:"user"`
+		Token string `json:"token"`
+	}
+
+	RegisteredResponse struct {
+		Id any `json:"id"`
+	}
+
+	UserErrResponse struct {
+		Error string `json:"error"`
+	}
 )
 
-func (user *User) New() {
-	user.CreatedAt = time.Now()
-	user.UpdatedAt = time.Now()
+const _userCollection = "user"
+
+func NewUserService(config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IUserService {
+	return &UserService{
+		Config:      config,
+		Jwt:         jwt,
+		MongoClient: mongoClient,
+	}
 }
 
-func Authenticate(login Login) (map[string]any, error) {
+func (s *UserService) Authenticate(login Login) (AuthenticatedResponse, error) {
 	login.Password = util.EncodeString(login.Password)
 
-	res := database.FindOneDocument(userCollection, bson.M{"email": login.Email, "password": login.Password})
+	res := s.MongoClient.FindOneDocument(_userCollection, bson.M{"email": login.Email, "password": login.Password})
 
 	var user User
 	if err := res.Decode(&user); err != nil {
 		log.Println(err)
-		return nil, err
+		return AuthenticatedResponse{}, err
 	}
 
-	ss, err := jwt.CreateToken(user, config.GetChrono("jwt.auth.expiry"))
+	ss, err := s.Jwt.CreateToken(user, s.Config.Jwt.Auth.Expiry)
 	if err != nil {
 		log.Println("Error creating JWT.", err)
-		return nil, err
+		return AuthenticatedResponse{}, err
 	}
 
 	user.Password = ""
 
-	return map[string]any{
-		"user":  user,
-		"token": ss,
+	return AuthenticatedResponse{
+		user,
+		ss,
 	}, nil
 }
 
-func Register(user User) (*mongo.InsertOneResult, error) {
+func (s *UserService) Register(user User) (RegisteredResponse, error) {
+	// Default attribute values
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+
 	// Check for existing users by email
-	exists := database.FindOneDocument(userCollection, bson.M{"email": user.Email})
+	exists := s.MongoClient.FindOneDocument(_userCollection, bson.M{"email": user.Email})
 
 	if exists.Err() == nil {
-		return nil, fmt.Errorf("existing document found with email: '%v'", user.Email)
+		return RegisteredResponse{}, fmt.Errorf("existing document found with email: '%v'", user.Email)
 	}
 
 	user.Password = util.EncodeString(user.Password)
 
-	res, err := database.CreateOneDocument(userCollection, user)
+	res, err := s.MongoClient.CreateOneDocument(_userCollection, user)
 	if err != nil {
-		return nil, err
+		return RegisteredResponse{}, err
 	}
 
-	return res, nil
+	return RegisteredResponse{res.InsertedID}, nil
 }

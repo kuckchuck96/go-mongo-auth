@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"go-mongo-auth/internal/jwt"
 	"log"
 	"net/http"
 	"strings"
@@ -9,22 +8,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Headers struct {
-	Authorization string `json:"Authorization" binding:"required,startswith=Bearer "`
-	Source        string `json:"source" binding:"required,eq=test"`
-}
+type (
+	Headers struct {
+		Authorization string `json:"Authorization" binding:"required,startswith=Bearer "`
+		Source        string `json:"source" binding:"required,eq=test"`
+	}
 
-type InvalidRequest struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
+	InvalidRequest struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+)
 
-var exclude = []string{"/login", "/register"}
+var _exclude = []string{"/login", "/register", "/swagger"}
 
-func RequestValidation() gin.HandlerFunc {
+func requestValidation(m *Middleware) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		for _, e := range exclude {
-			if strings.HasSuffix(ctx.Request.RequestURI, e) {
+		for _, e := range _exclude {
+			if strings.Contains(ctx.Request.RequestURI, e) {
 				return
 			}
 		}
@@ -43,7 +44,7 @@ func RequestValidation() gin.HandlerFunc {
 		// Extract token and validate
 		token := strings.Split(headers.Authorization, " ")[1]
 
-		entity, err := jwt.ValidateToken(token)
+		entity, err := m.Jwt.ValidateToken(token)
 		if err != nil || entity == nil {
 			log.Println("Error validating token.", err)
 			ctx.JSON(http.StatusUnauthorized, InvalidRequest{

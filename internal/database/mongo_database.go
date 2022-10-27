@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"go-mongo-auth/internal/config"
-	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,53 +10,64 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var MongoClient *mongo.Client
-
-func ConnectionManager() error {
-	client, err := mongo.NewClient(options.Client().ApplyURI(config.Get("mongo.uri")))
-	if err != nil {
-		return err
+type (
+	IMongoClient interface {
+		GetCollection(string) *mongo.Collection
+		CreateOneDocument(string, any) (*mongo.InsertOneResult, error)
+		FindOneDocument(string, primitive.M) *mongo.SingleResult
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), config.GetChrono("mongo.timeout"))
+	MongoClient struct {
+		Client *mongo.Client
+		Config config.Config
+	}
+)
+
+func NewMongoClient(config config.Config) (IMongoClient, error) {
+	client, err := mongo.NewClient(options.Client().ApplyURI(config.Mongo.Uri))
+	if err != nil {
+		return nil, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), config.Mongo.Timeout)
 	defer cancel()
 
 	err = client.Connect(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// ping data base
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	log.Println("Mongo client created.")
-	MongoClient = client
-
-	return nil
+	return &MongoClient{
+		client,
+		config,
+	}, nil
 }
 
-func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
-	collection := client.Database(config.Get("mongo.database")).Collection(collectionName)
+func (c *MongoClient) GetCollection(collectionName string) *mongo.Collection {
+	collection := c.Client.Database(c.Config.Mongo.Database).Collection(collectionName)
 	return collection
 }
 
-func CreateOneDocument(collectionName string, doc any) (*mongo.InsertOneResult, error) {
+func (c *MongoClient) CreateOneDocument(collectionName string, doc any) (*mongo.InsertOneResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	collection := GetCollection(MongoClient, collectionName)
+	collection := c.GetCollection(collectionName)
 
 	return collection.InsertOne(ctx, doc)
 }
 
-func FindOneDocument(collectionName string, filter primitive.M) *mongo.SingleResult {
+func (c *MongoClient) FindOneDocument(collectionName string, filter primitive.M) *mongo.SingleResult {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	collection := GetCollection(MongoClient, collectionName)
+	collection := c.GetCollection(collectionName)
 
 	return collection.FindOne(ctx, filter)
 }

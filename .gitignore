@@ -3,8 +3,5 @@
 !.vscode/launch.json
 .DS_Store
 
-# Go specific
-go.sum
-
 # Local configs
 *dev.yaml

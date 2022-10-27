@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"go-mongo-auth/internal/config"
+	"go-mongo-auth/internal/database"
+	"go-mongo-auth/internal/jwt"
 	"go-mongo-auth/internal/service"
 	"log"
 	"net/http"
@@ -8,22 +11,50 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Login(ctx *gin.Context) {
+type (
+	IUserController interface {
+		Login(*gin.Context)
+		Register(*gin.Context)
+	}
+
+	UserController struct {
+		Service service.IUserService
+	}
+)
+
+func NewUserController(config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IUserController {
+	return &UserController{
+		service.NewUserService(config, jwt, mongoClient),
+	}
+}
+
+// Login godoc
+// @Summary User login
+// @Schemes
+// @Description User login via email and password
+// @Tags login
+// @Accept json
+// @Produce json
+// @Param req body service.Login true "User login request"
+// @Success 200 {object} service.AuthenticatedResponse
+// @Failure 500 {object} service.UserErrResponse
+// @Router /user/login [post]
+func (c *UserController) Login(ctx *gin.Context) {
 	var login service.Login
 
 	if err := ctx.ShouldBindJSON(&login); err != nil {
 		log.Println("Unable to bind request body.", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+		ctx.JSON(http.StatusInternalServerError, service.UserErrResponse{
+			Error: err.Error(),
 		})
 		return
 	}
 
-	res, err := service.Authenticate(login)
+	res, err := c.Service.Authenticate(login)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+		ctx.JSON(http.StatusInternalServerError, service.UserErrResponse{
+			Error: err.Error(),
 		})
 		return
 	}
@@ -31,23 +62,33 @@ func Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func Register(ctx *gin.Context) {
+// Register godoc
+// @Summary User registration
+// @Schemes
+// @Description User registration
+// @Tags register
+// @Accept json
+// @Produce json
+// @Param req body service.User true "User registeration request"
+// @Success 200 {object} service.RegisteredResponse
+// @Failure 500 {object} service.UserErrResponse
+// @Router /user/register [post]
+func (c *UserController) Register(ctx *gin.Context) {
 	var req service.User
-	req.New()
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		log.Println("Unable to bind request body.", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+		ctx.JSON(http.StatusInternalServerError, service.UserErrResponse{
+			Error: err.Error(),
 		})
 		return
 	}
 
-	res, err := service.Register(req)
+	res, err := c.Service.Register(req)
 	if err != nil {
 		log.Println("Unable to create new user.", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+		ctx.JSON(http.StatusInternalServerError, service.UserErrResponse{
+			Error: err.Error(),
 		})
 		return
 	}

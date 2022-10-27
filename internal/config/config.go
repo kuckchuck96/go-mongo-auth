@@ -12,33 +12,59 @@ import (
 
 const configDir = "./config"
 
-var v *viper.Viper
+type (
+	Mongo struct {
+		Uri      string
+		Database string
+		Timeout  time.Duration
+	}
 
-func Load() error {
+	Auth struct {
+		Expiry time.Duration
+	}
+
+	Jwt struct {
+		SigningKey string `mapstructure:"signing-key"`
+		Auth       Auth
+	}
+
+	App struct {
+		Name        string
+		Env         string
+		Port        int
+		Description string
+		BasePath    string `mapstructure:"base-path"`
+		Version     string
+	}
+	Config struct {
+		App   App
+		Jwt   Jwt
+		Mongo Mongo
+	}
+)
+
+func NewConfig() (Config, error) {
 	profile := flag.String("profile", "", "Profile for run configuration")
 	flag.Parse()
 
 	if strings.TrimSpace(*profile) == "" {
-		return errors.New("no profile specified for run configuration")
+		return Config{}, errors.New("no profile specified for run configuration")
 	}
 
-	v = viper.New()
+	v := viper.New()
 	v.AddConfigPath(configDir)
 	v.SetConfigName(*profile)
 	v.SetConfigType("yaml")
 	if err := v.ReadInConfig(); err != nil {
-		return errors.New("unable to load configuration")
+		return Config{}, errors.New("unable to load configuration")
 	}
 
 	log.Printf("'%v' profile activated.\n", *profile)
 
-	return nil
-}
+	var c Config
+	if err := v.Unmarshal(&c); err != nil {
+		return Config{}, err
+	}
 
-func Get(prop string) string {
-	return v.GetString(prop)
-}
-
-func GetChrono(prop string) time.Duration {
-	return v.GetDuration(prop)
+	return c, nil
 }
