@@ -2,6 +2,9 @@ app:
     name: go-mongo-auth
     env: prod
     port: 8080
+    description: JWT authentication using gin-gonic and mongoDB.
+    base-path: /api/v1
+    version: '1.0'
 
 jwt:
     signing-key: ${SECRET_KEY}
