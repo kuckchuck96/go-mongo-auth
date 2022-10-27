@@ -29,9 +29,12 @@ type (
 	}
 
 	App struct {
-		Name string
-		Env  string
-		Port int
+		Name        string
+		Env         string
+		Port        int
+		Description string
+		BasePath    string `mapstructure:"base-path"`
+		Version     string
 	}
 	Config struct {
 		App   App

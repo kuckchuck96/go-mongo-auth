@@ -20,12 +20,12 @@ type (
 	}
 )
 
-var _exclude = []string{"/login", "/register"}
+var _exclude = []string{"/login", "/register", "/swagger"}
 
 func requestValidation(m *Middleware) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		for _, e := range _exclude {
-			if strings.HasSuffix(ctx.Request.RequestURI, e) {
+			if strings.Contains(ctx.Request.RequestURI, e) {
 				return
 			}
 		}

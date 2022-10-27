@@ -7,6 +7,7 @@ import (
 	"go-mongo-auth/internal/jwt"
 	"go-mongo-auth/internal/middleware"
 	"go-mongo-auth/internal/route"
+	"go-mongo-auth/internal/swagger"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -41,6 +42,9 @@ func main() {
 
 	// Configure routes
 	route.NewRoute(engine, config, jwt, mongo).AddRoutes()
+
+	// Configure swagger
+	swagger.ConfigureSwagger(config.App)
 
 	if err := engine.Run(fmt.Sprintf(":%v", config.App.Port)); err != nil {
 		log.Fatalln(err)

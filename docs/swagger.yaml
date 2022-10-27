@@ -1,0 +1,105 @@
+definitions:
+  service.AuthenticatedResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/service.User'
+    type: object
+  service.Login:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  service.RegisteredResponse:
+    properties:
+      id: {}
+    type: object
+  service.User:
+    properties:
+      created:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      updated:
+        type: string
+      verified:
+        default: false
+        type: boolean
+    required:
+    - email
+    - name
+    - password
+    type: object
+  service.UserErrResponse:
+    properties:
+      error:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: User login via email and password
+      parameters:
+      - description: User login request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/service.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.AuthenticatedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/service.UserErrResponse'
+      summary: User login
+      tags:
+      - login
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: User registration
+      parameters:
+      - description: User registeration request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/service.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.RegisteredResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/service.UserErrResponse'
+      summary: User registration
+      tags:
+      - register
+swagger: "2.0"
