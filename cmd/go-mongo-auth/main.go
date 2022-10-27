@@ -18,6 +18,13 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	// Set gin mode
+	mode := gin.ReleaseMode
+	if config.App.Env == "dev" {
+		mode = gin.DebugMode
+	}
+	gin.SetMode(mode)
+
 	engine := gin.Default()
 
 	// Jwt token

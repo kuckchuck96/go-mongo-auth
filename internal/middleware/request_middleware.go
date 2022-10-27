@@ -8,15 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Headers struct {
-	Authorization string `json:"Authorization" binding:"required,startswith=Bearer "`
-	Source        string `json:"source" binding:"required,eq=test"`
-}
+type (
+	Headers struct {
+		Authorization string `json:"Authorization" binding:"required,startswith=Bearer "`
+		Source        string `json:"source" binding:"required,eq=test"`
+	}
 
-type InvalidRequest struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
+	InvalidRequest struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+)
 
 var _exclude = []string{"/login", "/register"}
 

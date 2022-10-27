@@ -25,26 +25,24 @@ type (
 		Jwt         jwt.IJwtToken
 		MongoClient database.IMongoClient
 	}
+
+	Login struct {
+		Email    string `form:"email" json:"email" binding:"email,required"`
+		Password string `form:"password" json:"password" binding:"required"`
+	}
+
+	User struct {
+		Id        primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+		Name      string             `json:"name" binding:"required"`
+		Email     string             `json:"email" binding:"email,required"`
+		Password  string             `json:"password,omitempty" binding:"required"`
+		Verified  bool               `json:"verified" bson:"verified" default:"false"`
+		CreatedAt time.Time          `json:"created" bson:"createdAt"`
+		UpdatedAt time.Time          `json:"updated" bson:"updatedAt"`
+	}
 )
 
-type Login struct {
-	Email    string `form:"email" json:"email" binding:"email,required"`
-	Password string `form:"password" json:"password" binding:"required"`
-}
-
-type User struct {
-	Id        primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Name      string             `json:"name" binding:"required"`
-	Email     string             `json:"email" binding:"email,required"`
-	Password  string             `json:"password,omitempty" binding:"required"`
-	Verified  bool               `json:"verified" bson:"verified" default:"false"`
-	CreatedAt time.Time          `json:"created" bson:"createdAt"`
-	UpdatedAt time.Time          `json:"updated" bson:"updatedAt"`
-}
-
-const (
-	_userCollection = "user"
-)
+const _userCollection = "user"
 
 func NewUserService(config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IUserService {
 	return &UserService{

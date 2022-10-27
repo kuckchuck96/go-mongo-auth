@@ -59,7 +59,9 @@ func NewConfig() (Config, error) {
 	log.Printf("'%v' profile activated.\n", *profile)
 
 	var c Config
-	_ = v.Unmarshal(&c)
+	if err := v.Unmarshal(&c); err != nil {
+		return Config{}, err
+	}
 
 	return c, nil
 }
