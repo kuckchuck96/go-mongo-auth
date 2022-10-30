@@ -18,18 +18,18 @@ type (
 	}
 
 	MongoClient struct {
-		Client *mongo.Client
-		Config config.Config
+		Client      *mongo.Client
+		MongoConfig config.Mongo
 	}
 )
 
-func NewMongoClient(config config.Config) (IMongoClient, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(config.Mongo.Uri))
+func NewMongoClient(mongoConfig config.Mongo) (IMongoClient, error) {
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoConfig.Uri))
 	if err != nil {
 		return nil, err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), config.Mongo.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), mongoConfig.Timeout)
 	defer cancel()
 
 	err = client.Connect(ctx)
@@ -45,12 +45,12 @@ func NewMongoClient(config config.Config) (IMongoClient, error) {
 
 	return &MongoClient{
 		client,
-		config,
+		mongoConfig,
 	}, nil
 }
 
 func (c *MongoClient) GetCollection(collectionName string) *mongo.Collection {
-	collection := c.Client.Database(c.Config.Mongo.Database).Collection(collectionName)
+	collection := c.Client.Database(c.MongoConfig.Database).Collection(collectionName)
 	return collection
 }
 

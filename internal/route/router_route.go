@@ -17,20 +17,22 @@ type (
 	}
 
 	Route struct {
-		Engine *gin.Engine
-		User   controller.IUserController
+		Engine    *gin.Engine
+		AppConfig config.App
+		User      controller.IUserController
 	}
 )
 
 func NewRoute(engine *gin.Engine, config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IRoute {
 	return &Route{
-		Engine: engine,
-		User:   controller.NewUserController(config, jwt, mongoClient),
+		Engine:    engine,
+		AppConfig: config.App,
+		User:      controller.NewUserController(config, jwt, mongoClient),
 	}
 }
 
 func (r *Route) AddRoutes() {
-	v1 := r.Engine.Group("/api/v1")
+	v1 := r.Engine.Group(r.AppConfig.BasePath)
 	{
 		userRoutes(r, v1)
 		swaggerRoutes(r, v1)

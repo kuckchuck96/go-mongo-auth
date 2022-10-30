@@ -67,10 +67,8 @@ func NewUserService(config config.Config, jwt jwt.IJwtToken, mongoClient databas
 func (s *UserService) Authenticate(login Login) (AuthenticatedResponse, error) {
 	login.Password = util.EncodeString(login.Password)
 
-	res := s.MongoClient.FindOneDocument(_userCollection, bson.M{"email": login.Email, "password": login.Password})
-
 	var user User
-	if err := res.Decode(&user); err != nil {
+	if err := s.MongoClient.FindOneDocument(_userCollection, bson.M{"email": login.Email, "password": login.Password}).Decode(&user); err != nil {
 		log.Println(err)
 		return AuthenticatedResponse{}, err
 	}
@@ -95,9 +93,7 @@ func (s *UserService) Register(user User) (RegisteredResponse, error) {
 	user.UpdatedAt = time.Now()
 
 	// Check for existing users by email
-	exists := s.MongoClient.FindOneDocument(_userCollection, bson.M{"email": user.Email})
-
-	if exists.Err() == nil {
+	if s.MongoClient.FindOneDocument(_userCollection, bson.M{"email": user.Email}).Err() == nil {
 		return RegisteredResponse{}, fmt.Errorf("existing document found with email: '%v'", user.Email)
 	}
 
