@@ -44,7 +44,7 @@ func requestValidation(m *Middleware) gin.HandlerFunc {
 		// Extract token and validate
 		token := strings.Split(headers.Authorization, " ")[1]
 
-		entity, err := m.Jwt.ValidateToken(token)
+		entity, err := m.jwt.ValidateToken(token)
 		if err != nil || entity == nil {
 			log.Println("Error validating token.", err)
 			ctx.JSON(http.StatusUnauthorized, InvalidRequest{

@@ -17,20 +17,22 @@ type (
 	}
 
 	Route struct {
-		Engine *gin.Engine
-		User   controller.IUserController
+		engine    *gin.Engine
+		appConfig config.App
+		user      controller.IUserController
 	}
 )
 
 func NewRoute(engine *gin.Engine, config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IRoute {
 	return &Route{
-		Engine: engine,
-		User:   controller.NewUserController(config, jwt, mongoClient),
+		engine:    engine,
+		appConfig: config.App,
+		user:      controller.NewUserController(config, jwt, mongoClient),
 	}
 }
 
 func (r *Route) AddRoutes() {
-	v1 := r.Engine.Group("/api/v1")
+	v1 := r.engine.Group(r.appConfig.BasePath)
 	{
 		userRoutes(r, v1)
 		swaggerRoutes(r, v1)
@@ -39,8 +41,8 @@ func (r *Route) AddRoutes() {
 
 func userRoutes(r *Route, group *gin.RouterGroup) {
 	userRoutes := group.Group("/user")
-	userRoutes.POST("/login", r.User.Login)
-	userRoutes.POST("/register", r.User.Register)
+	userRoutes.POST("/login", r.user.Login)
+	userRoutes.POST("/register", r.user.Register)
 }
 
 func swaggerRoutes(r *Route, group *gin.RouterGroup) {

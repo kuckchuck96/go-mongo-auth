@@ -35,7 +35,7 @@ func main() {
 	middleware.NewMiddleware(engine, jwt).AddMiddlewares()
 
 	// Init mongo
-	mongo, err := database.NewMongoClient(config)
+	mongo, err := database.NewMongoClient(config.Mongo)
 	if err != nil {
 		log.Fatalln(err)
 	}

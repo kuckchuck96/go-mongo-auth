@@ -12,15 +12,15 @@ type (
 	}
 
 	Middleware struct {
-		Engine *gin.Engine
-		Jwt    jwt.IJwtToken
+		engine *gin.Engine
+		jwt    jwt.IJwtToken
 	}
 )
 
 func NewMiddleware(engine *gin.Engine, jwt jwt.IJwtToken) IMiddleware {
 	return &Middleware{
-		Engine: engine,
-		Jwt:    jwt,
+		engine: engine,
+		jwt:    jwt,
 	}
 }
 
@@ -29,5 +29,5 @@ func (m *Middleware) AddMiddlewares() {
 		requestValidation(m),
 	}
 
-	m.Engine.Use(middlewares...)
+	m.engine.Use(middlewares...)
 }
