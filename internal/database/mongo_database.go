@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"go-mongo-auth/internal/config"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -55,7 +54,7 @@ func (c *MongoClient) GetCollection(collectionName string) *mongo.Collection {
 }
 
 func (c *MongoClient) CreateOneDocument(collectionName string, doc any) (*mongo.InsertOneResult, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), c.mongoConfig.ContextTimeout)
 	defer cancel()
 
 	collection := c.GetCollection(collectionName)
@@ -64,7 +63,7 @@ func (c *MongoClient) CreateOneDocument(collectionName string, doc any) (*mongo.
 }
 
 func (c *MongoClient) FindOneDocument(collectionName string, filter primitive.M) *mongo.SingleResult {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), c.mongoConfig.ContextTimeout)
 	defer cancel()
 
 	collection := c.GetCollection(collectionName)
