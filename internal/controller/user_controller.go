@@ -18,13 +18,13 @@ type (
 	}
 
 	UserController struct {
-		Service service.IUserService
+		userService service.IUserService
 	}
 )
 
 func NewUserController(config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IUserController {
 	return &UserController{
-		service.NewUserService(config, jwt, mongoClient),
+		userService: service.NewUserService(config, jwt, mongoClient),
 	}
 }
 
@@ -50,7 +50,7 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	res, err := c.Service.Authenticate(login)
+	res, err := c.userService.Authenticate(login)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, service.UserErrResponse{
@@ -84,7 +84,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 		return
 	}
 
-	res, err := c.Service.Register(req)
+	res, err := c.userService.Register(req)
 	if err != nil {
 		log.Println("Unable to create new user.", err)
 		ctx.JSON(http.StatusInternalServerError, service.UserErrResponse{

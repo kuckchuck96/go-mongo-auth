@@ -20,9 +20,9 @@ type (
 	}
 
 	UserService struct {
-		Config      config.Config
-		Jwt         jwt.IJwtToken
-		MongoClient database.IMongoClient
+		config      config.Config
+		jwt         jwt.IJwtToken
+		mongoClient database.IMongoClient
 	}
 
 	Login struct {
@@ -58,9 +58,9 @@ const _userCollection = "user"
 
 func NewUserService(config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IUserService {
 	return &UserService{
-		Config:      config,
-		Jwt:         jwt,
-		MongoClient: mongoClient,
+		config:      config,
+		jwt:         jwt,
+		mongoClient: mongoClient,
 	}
 }
 
@@ -68,12 +68,12 @@ func (s *UserService) Authenticate(login Login) (AuthenticatedResponse, error) {
 	login.Password = util.EncodeString(login.Password)
 
 	var user User
-	if err := s.MongoClient.FindOneDocument(_userCollection, bson.M{"email": login.Email, "password": login.Password}).Decode(&user); err != nil {
+	if err := s.mongoClient.FindOneDocument(_userCollection, bson.M{"email": login.Email, "password": login.Password}).Decode(&user); err != nil {
 		log.Println(err)
 		return AuthenticatedResponse{}, err
 	}
 
-	ss, err := s.Jwt.CreateToken(user, s.Config.Jwt.Auth.Expiry)
+	ss, err := s.jwt.CreateToken(user, s.config.Jwt.Auth.Expiry)
 	if err != nil {
 		log.Println("Error creating JWT.", err)
 		return AuthenticatedResponse{}, err
@@ -93,13 +93,13 @@ func (s *UserService) Register(user User) (RegisteredResponse, error) {
 	user.UpdatedAt = time.Now()
 
 	// Check for existing users by email
-	if s.MongoClient.FindOneDocument(_userCollection, bson.M{"email": user.Email}).Err() == nil {
+	if s.mongoClient.FindOneDocument(_userCollection, bson.M{"email": user.Email}).Err() == nil {
 		return RegisteredResponse{}, fmt.Errorf("existing document found with email: '%v'", user.Email)
 	}
 
 	user.Password = util.EncodeString(user.Password)
 
-	res, err := s.MongoClient.CreateOneDocument(_userCollection, user)
+	res, err := s.mongoClient.CreateOneDocument(_userCollection, user)
 	if err != nil {
 		return RegisteredResponse{}, err
 	}

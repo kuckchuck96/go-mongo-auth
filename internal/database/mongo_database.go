@@ -18,8 +18,8 @@ type (
 	}
 
 	MongoClient struct {
-		Client      *mongo.Client
-		MongoConfig config.Mongo
+		client      *mongo.Client
+		mongoConfig config.Mongo
 	}
 )
 
@@ -44,13 +44,13 @@ func NewMongoClient(mongoConfig config.Mongo) (IMongoClient, error) {
 	}
 
 	return &MongoClient{
-		client,
-		mongoConfig,
+		client:      client,
+		mongoConfig: mongoConfig,
 	}, nil
 }
 
 func (c *MongoClient) GetCollection(collectionName string) *mongo.Collection {
-	collection := c.Client.Database(c.MongoConfig.Database).Collection(collectionName)
+	collection := c.client.Database(c.mongoConfig.Database).Collection(collectionName)
 	return collection
 }
 
