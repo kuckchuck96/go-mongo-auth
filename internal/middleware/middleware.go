@@ -11,20 +11,20 @@ type (
 		AddMiddlewares()
 	}
 
-	Middleware struct {
+	middleware struct {
 		engine *gin.Engine
 		jwt    jwt.IJwtToken
 	}
 )
 
 func NewMiddleware(engine *gin.Engine, jwt jwt.IJwtToken) IMiddleware {
-	return &Middleware{
+	return &middleware{
 		engine: engine,
 		jwt:    jwt,
 	}
 }
 
-func (m *Middleware) AddMiddlewares() {
+func (m *middleware) AddMiddlewares() {
 	middlewares := []gin.HandlerFunc{
 		requestValidation(m),
 	}

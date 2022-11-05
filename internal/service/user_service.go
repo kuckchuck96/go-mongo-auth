@@ -19,7 +19,7 @@ type (
 		Register(User) (RegisteredResponse, error)
 	}
 
-	UserService struct {
+	userService struct {
 		config      config.Config
 		jwt         jwt.IJwtToken
 		mongoClient database.IMongoClient
@@ -57,14 +57,14 @@ type (
 const _userCollection = "user"
 
 func NewUserService(config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IUserService {
-	return &UserService{
+	return &userService{
 		config:      config,
 		jwt:         jwt,
 		mongoClient: mongoClient,
 	}
 }
 
-func (s *UserService) Authenticate(login Login) (AuthenticatedResponse, error) {
+func (s *userService) Authenticate(login Login) (AuthenticatedResponse, error) {
 	login.Password = utils.EncodeString(login.Password)
 
 	var user User
@@ -87,7 +87,7 @@ func (s *UserService) Authenticate(login Login) (AuthenticatedResponse, error) {
 	}, nil
 }
 
-func (s *UserService) Register(user User) (RegisteredResponse, error) {
+func (s *userService) Register(user User) (RegisteredResponse, error) {
 	// Default attribute values
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()

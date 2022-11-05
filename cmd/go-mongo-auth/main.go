@@ -2,12 +2,8 @@ package main
 
 import (
 	"fmt"
+	"go-mongo-auth/internal/app"
 	"go-mongo-auth/internal/config"
-	"go-mongo-auth/internal/database"
-	"go-mongo-auth/internal/jwt"
-	"go-mongo-auth/internal/middleware"
-	"go-mongo-auth/internal/route"
-	"go-mongo-auth/internal/swagger"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -28,23 +24,10 @@ func main() {
 
 	engine := gin.Default()
 
-	// Jwt token
-	jwt := jwt.NewJwtToken(config)
-
-	// Configure Middlewares
-	middleware.NewMiddleware(engine, jwt).AddMiddlewares()
-
-	// Init mongo
-	mongo, err := database.NewMongoClient(config.Mongo)
-	if err != nil {
+	// Initialize
+	if err = app.Initialize(engine, config); err != nil {
 		log.Fatalln(err)
 	}
-
-	// Configure routes
-	route.NewRoute(engine, config, jwt, mongo).AddRoutes()
-
-	// Configure swagger
-	swagger.ConfigureSwagger(config.App)
 
 	if err := engine.Run(fmt.Sprintf(":%v", config.App.Port)); err != nil {
 		log.Fatalln(err)
