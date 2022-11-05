@@ -14,9 +14,10 @@ const configDir = "./config"
 
 type (
 	Mongo struct {
-		Uri      string
-		Database string
-		Timeout  time.Duration
+		Uri            string
+		Database       string
+		Timeout        time.Duration
+		ContextTimeout time.Duration `mapstructure:"context-timeout"`
 	}
 
 	Auth struct {

@@ -5,7 +5,7 @@ import (
 	"go-mongo-auth/internal/config"
 	"go-mongo-auth/internal/database"
 	"go-mongo-auth/internal/jwt"
-	"go-mongo-auth/internal/util"
+	"go-mongo-auth/internal/utils"
 	"log"
 	"time"
 
@@ -65,7 +65,7 @@ func NewUserService(config config.Config, jwt jwt.IJwtToken, mongoClient databas
 }
 
 func (s *UserService) Authenticate(login Login) (AuthenticatedResponse, error) {
-	login.Password = util.EncodeString(login.Password)
+	login.Password = utils.EncodeString(login.Password)
 
 	var user User
 	if err := s.mongoClient.FindOneDocument(_userCollection, bson.M{"email": login.Email, "password": login.Password}).Decode(&user); err != nil {
@@ -97,7 +97,7 @@ func (s *UserService) Register(user User) (RegisteredResponse, error) {
 		return RegisteredResponse{}, fmt.Errorf("existing document found with email: '%v'", user.Email)
 	}
 
-	user.Password = util.EncodeString(user.Password)
+	user.Password = utils.EncodeString(user.Password)
 
 	res, err := s.mongoClient.CreateOneDocument(_userCollection, user)
 	if err != nil {

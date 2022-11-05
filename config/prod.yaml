@@ -15,4 +15,4 @@ mongo:
     uri: ${MONGO_URI}
     database: ${DATABASE_NAME}
     timeout: ${CONNECTION_TIMEOUT}
-    
+    context-timeout: ${CONTEXT_TIMEOUT}
