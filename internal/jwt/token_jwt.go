@@ -14,26 +14,26 @@ type (
 		ValidateToken(string) (any, error)
 	}
 
-	JwtToken struct {
-		Config config.Config
+	jwtToken struct {
+		config config.Config
+	}
+
+	CustomClaims struct {
+		Entity any
+		jwt.RegisteredClaims
 	}
 )
 
-type CustomClaims struct {
-	Entity any
-	jwt.RegisteredClaims
-}
-
 func NewJwtToken(config config.Config) IJwtToken {
-	return &JwtToken{
+	return &jwtToken{
 		config,
 	}
 }
 
-func (j *JwtToken) CreateToken(o any, expiry time.Duration) (string, error) {
+func (j *jwtToken) CreateToken(o any, expiry time.Duration) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, createClaims(j, o, expiry))
 
-	ss, err := token.SignedString([]byte(j.Config.Jwt.SigningKey))
+	ss, err := token.SignedString([]byte(j.config.Jwt.SigningKey))
 
 	if err != nil {
 		log.Println(err)
@@ -42,21 +42,21 @@ func (j *JwtToken) CreateToken(o any, expiry time.Duration) (string, error) {
 	return ss, err
 }
 
-func createClaims(j *JwtToken, o any, expiry time.Duration) CustomClaims {
+func createClaims(j *jwtToken, o any, expiry time.Duration) CustomClaims {
 	return CustomClaims{
 		o,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiry)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    j.Config.App.Name,
+			Issuer:    j.config.App.Name,
 		},
 	}
 }
 
-func (j *JwtToken) ValidateToken(tokenString string) (any, error) {
+func (j *jwtToken) ValidateToken(tokenString string) (any, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(t *jwt.Token) (any, error) {
-		return []byte(j.Config.Jwt.SigningKey), nil
+		return []byte(j.config.Jwt.SigningKey), nil
 	})
 
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {

@@ -16,7 +16,7 @@ type (
 		FindOneDocument(string, primitive.M) *mongo.SingleResult
 	}
 
-	MongoClient struct {
+	mongoClient struct {
 		client      *mongo.Client
 		mongoConfig config.Mongo
 	}
@@ -42,22 +42,22 @@ func NewMongoClient(mongoConfig config.Mongo) (IMongoClient, error) {
 		return nil, err
 	}
 
-	return &MongoClient{
+	return &mongoClient{
 		client:      client,
 		mongoConfig: mongoConfig,
 	}, nil
 }
 
-func getContextWithTimeout(client *MongoClient) (context.Context, context.CancelFunc) {
+func getContextWithTimeout(client *mongoClient) (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), client.mongoConfig.ContextTimeout)
 }
 
-func (client *MongoClient) GetCollection(collectionName string) *mongo.Collection {
+func (client *mongoClient) GetCollection(collectionName string) *mongo.Collection {
 	collection := client.client.Database(client.mongoConfig.Database).Collection(collectionName)
 	return collection
 }
 
-func (client *MongoClient) CreateOneDocument(collectionName string, doc any) (*mongo.InsertOneResult, error) {
+func (client *mongoClient) CreateOneDocument(collectionName string, doc any) (*mongo.InsertOneResult, error) {
 	ctx, cancel := getContextWithTimeout(client)
 	defer cancel()
 
@@ -66,7 +66,7 @@ func (client *MongoClient) CreateOneDocument(collectionName string, doc any) (*m
 	return collection.InsertOne(ctx, doc)
 }
 
-func (client *MongoClient) FindOneDocument(collectionName string, filter primitive.M) *mongo.SingleResult {
+func (client *mongoClient) FindOneDocument(collectionName string, filter primitive.M) *mongo.SingleResult {
 	ctx, cancel := getContextWithTimeout(client)
 	defer cancel()
 

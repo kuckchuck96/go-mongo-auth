@@ -22,7 +22,7 @@ type (
 
 var _exclude = []string{"/login", "/register", "/swagger"}
 
-func requestValidation(m *Middleware) gin.HandlerFunc {
+func requestValidation(m *middleware) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		for _, e := range _exclude {
 			if strings.Contains(ctx.Request.RequestURI, e) {
@@ -39,6 +39,7 @@ func requestValidation(m *Middleware) gin.HandlerFunc {
 				Code:    http.StatusBadRequest,
 				Message: err.Error(),
 			})
+			return
 		}
 
 		// Extract token and validate
