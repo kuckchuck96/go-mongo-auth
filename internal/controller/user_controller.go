@@ -44,7 +44,7 @@ func (c *userController) Login(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&login); err != nil {
 		log.Println("Unable to bind request body.", err)
-		ctx.JSON(http.StatusInternalServerError, service.UserErrResponse{
+		ctx.JSON(http.StatusBadRequest, service.UserErrResponse{
 			Error: err.Error(),
 		})
 		return
@@ -78,7 +78,7 @@ func (c *userController) Register(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		log.Println("Unable to bind request body.", err)
-		ctx.JSON(http.StatusInternalServerError, service.UserErrResponse{
+		ctx.JSON(http.StatusBadRequest, service.UserErrResponse{
 			Error: err.Error(),
 		})
 		return
