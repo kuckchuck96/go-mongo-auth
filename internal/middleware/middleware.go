@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"go-mongo-auth/internal/jwt"
+	"go-mongo-auth/internal/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 )

@@ -2,8 +2,8 @@ package controller
 
 import (
 	"go-mongo-auth/internal/config"
-	"go-mongo-auth/internal/database"
-	"go-mongo-auth/internal/jwt"
+	"go-mongo-auth/internal/pkg/jwt"
+	"go-mongo-auth/internal/pkg/mongo"
 	"go-mongo-auth/internal/service"
 	"log"
 	"net/http"
@@ -22,7 +22,7 @@ type (
 	}
 )
 
-func NewUserController(config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IUserController {
+func NewUserController(config config.Config, jwt jwt.IJwtToken, mongoClient mongo.IMongoClient) IUserController {
 	return &userController{
 		userService: service.NewUserService(config, jwt, mongoClient),
 	}

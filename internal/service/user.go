@@ -3,9 +3,9 @@ package service
 import (
 	"fmt"
 	"go-mongo-auth/internal/config"
-	"go-mongo-auth/internal/database"
-	"go-mongo-auth/internal/jwt"
-	"go-mongo-auth/internal/utils"
+	"go-mongo-auth/internal/pkg/jwt"
+	"go-mongo-auth/internal/pkg/mongo"
+	"go-mongo-auth/internal/pkg/utils"
 	"log"
 	"time"
 
@@ -22,7 +22,7 @@ type (
 	userService struct {
 		config      config.Config
 		jwt         jwt.IJwtToken
-		mongoClient database.IMongoClient
+		mongoClient mongo.IMongoClient
 	}
 
 	Login struct {
@@ -56,7 +56,7 @@ type (
 
 const _userCollection = "user"
 
-func NewUserService(config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IUserService {
+func NewUserService(config config.Config, jwt jwt.IJwtToken, mongoClient mongo.IMongoClient) IUserService {
 	return &userService{
 		config:      config,
 		jwt:         jwt,
