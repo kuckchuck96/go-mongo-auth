@@ -4,10 +4,14 @@ import (
 	"fmt"
 	"go-mongo-auth/internal/app"
 	"go-mongo-auth/internal/config"
+	"go-mongo-auth/internal/pkg/serve"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+const _dev = "dev"
 
 func main() {
 	config, err := config.NewConfig()
@@ -17,7 +21,7 @@ func main() {
 
 	// Set gin mode
 	mode := gin.ReleaseMode
-	if config.App.Env == "dev" {
+	if config.App.Env == _dev {
 		mode = gin.DebugMode
 	}
 	gin.SetMode(mode)
@@ -29,7 +33,9 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	if err := engine.Run(fmt.Sprintf(":%v", config.App.Port)); err != nil {
-		log.Fatalln(err)
-	}
+	// Create custom http server
+	serve.ListenAndServe(&http.Server{
+		Addr:    fmt.Sprintf(":%v", config.Server.Port),
+		Handler: engine,
+	}, config.Server.WaitTime)
 }

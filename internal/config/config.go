@@ -32,39 +32,55 @@ type (
 	App struct {
 		Name        string
 		Env         string
-		Port        int
 		Description string
 		BasePath    string `mapstructure:"base-path"`
 		Version     string
 	}
+
+	Server struct {
+		Port     int
+		WaitTime time.Duration `mapstructure:"wait-time"`
+	}
+
 	Config struct {
-		App   App
-		Jwt   Jwt
-		Mongo Mongo
+		App    App
+		Server Server
+		Jwt    Jwt
+		Mongo  Mongo
 	}
 )
 
-func NewConfig() (Config, error) {
-	profile := flag.String("profile", "", "Profile for run configuration")
-	flag.Parse()
+const (
+	_yaml    = "yaml"
+	_profile = "profile"
+)
 
-	if strings.TrimSpace(*profile) == "" {
-		return Config{}, errors.New("no profile specified for run configuration")
+func NewConfig() (Config, error) {
+	var env string
+	var c Config
+	profile := flag.String(_profile, "", "Profile for run configuration")
+	flag.Parse()
+	if !flag.Parsed() {
+		return c, errors.New("unable to parse the flag")
+	}
+	env = *profile
+
+	if strings.TrimSpace(env) == "" {
+		return c, errors.New("no profile specified for run configuration")
 	}
 
 	v := viper.New()
 	v.AddConfigPath(configDir)
-	v.SetConfigName(*profile)
-	v.SetConfigType("yaml")
+	v.SetConfigName(env)
+	v.SetConfigType(_yaml)
 	if err := v.ReadInConfig(); err != nil {
-		return Config{}, errors.New("unable to load configuration")
+		return c, errors.New("unable to load configuration")
 	}
 
-	log.Printf("'%v' profile activated.\n", *profile)
+	log.Printf("'%v' profile activated.\n", env)
 
-	var c Config
 	if err := v.Unmarshal(&c); err != nil {
-		return Config{}, err
+		return c, err
 	}
 
 	return c, nil
