@@ -7,7 +7,7 @@ app:
 
 server:
     port: 8080
-    wait-time: 10s
+    wait-time: 5s
 
 jwt:
     signing-key: ${SECRET_KEY}
