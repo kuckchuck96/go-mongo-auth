@@ -27,6 +27,7 @@ func NewMiddleware(engine *gin.Engine, jwt jwt.IJwtToken) IMiddleware {
 func (m *middleware) AddMiddlewares() {
 	middlewares := []gin.HandlerFunc{
 		gin.Logger(),
+		gin.CustomRecovery(AppRecovery),
 		requestValidation(m),
 	}
 
