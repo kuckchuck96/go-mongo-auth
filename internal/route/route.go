@@ -3,8 +3,8 @@ package route
 import (
 	"go-mongo-auth/internal/config"
 	"go-mongo-auth/internal/controller"
-	"go-mongo-auth/internal/database"
-	"go-mongo-auth/internal/jwt"
+	"go-mongo-auth/internal/pkg/jwt"
+	"go-mongo-auth/internal/pkg/mongo"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -23,7 +23,7 @@ type (
 	}
 )
 
-func NewRoute(engine *gin.Engine, config config.Config, jwt jwt.IJwtToken, mongoClient database.IMongoClient) IRoute {
+func NewRoute(engine *gin.Engine, config config.Config, jwt jwt.IJwtToken, mongoClient mongo.IMongoClient) IRoute {
 	return &route{
 		engine:    engine,
 		appConfig: config.App,

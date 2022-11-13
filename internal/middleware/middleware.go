@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"go-mongo-auth/internal/jwt"
+	"go-mongo-auth/internal/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +26,7 @@ func NewMiddleware(engine *gin.Engine, jwt jwt.IJwtToken) IMiddleware {
 
 func (m *middleware) AddMiddlewares() {
 	middlewares := []gin.HandlerFunc{
+		gin.Logger(),
 		requestValidation(m),
 	}
 

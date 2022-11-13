@@ -2,9 +2,9 @@ package app
 
 import (
 	"go-mongo-auth/internal/config"
-	"go-mongo-auth/internal/database"
-	"go-mongo-auth/internal/jwt"
 	"go-mongo-auth/internal/middleware"
+	"go-mongo-auth/internal/pkg/jwt"
+	"go-mongo-auth/internal/pkg/mongo"
 	"go-mongo-auth/internal/route"
 	"go-mongo-auth/internal/swagger"
 
@@ -19,7 +19,7 @@ func Initialize(engine *gin.Engine, config config.Config) error {
 	middleware.NewMiddleware(engine, jwt).AddMiddlewares()
 
 	// Init mongo
-	mongo, err := database.NewMongoClient(config.Mongo)
+	mongo, err := mongo.NewMongoClient(config.Mongo)
 	if err != nil {
 		return err
 	}
