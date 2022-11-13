@@ -12,7 +12,7 @@ type DefaultResponse struct {
 	Description string
 }
 
-func AppRecovery(ctx *gin.Context, recovered any) {
+func appRecovery(ctx *gin.Context, recovered any) {
 	res := DefaultResponse{
 		Message: http.StatusText(http.StatusInternalServerError),
 		Status:  http.StatusInternalServerError,
