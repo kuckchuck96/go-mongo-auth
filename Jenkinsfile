@@ -14,7 +14,7 @@ pipeline {
         appEnv = "$ENV".toLowerCase()
         appDir = "$appEnv/$BUILD_NUMBER/app"
         dockerHost = 'https://docker.io'
-        dockerAuth = credentials('docker-hub-auth')
+        dockerAuth = 'docker-hub-auth'
     }
     stages {
         stage('Checkout') {
