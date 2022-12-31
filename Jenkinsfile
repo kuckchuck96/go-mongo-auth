@@ -14,6 +14,7 @@ pipeline {
         appEnv = "$ENV"
         appDir = "$appEnv/$BUILD_NUMBER/app"
         dockerHost = 'https://docker.io'
+        dockerAuth = credentials('docker-hub-auth')
     }
     stages {
         stage('Checkout') {
@@ -50,7 +51,8 @@ pipeline {
                 script {
                     try {
                         dir(appDir) {
-                            docker.withRegistry(dockerHost, 'docker-hub-auth') {
+                            sh 'ls -ltra'
+                            docker.withRegistry(dockerHost, dockerAuth) {
                                 def dockerImage = docker.build("go-mongo-auth:$GIT_COMMIT")
                             }
                         }
