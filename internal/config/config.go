@@ -77,6 +77,11 @@ func NewConfig() (Config, error) {
 		return c, errors.New("unable to load configuration")
 	}
 
+	// Set env vars
+	if err := setEnvVars(v); err != nil {
+		return c, err
+	}
+
 	log.Printf("'%v' profile activated.\n", env)
 
 	if err := v.Unmarshal(&c); err != nil {
@@ -84,4 +89,22 @@ func NewConfig() (Config, error) {
 	}
 
 	return c, nil
+}
+
+func setEnvVars(v *viper.Viper) error {
+	if v == nil {
+		return errors.New("viper instance is nil")
+	}
+
+	var envName string
+	for _, key := range v.AllKeys() {
+		envName = v.GetString(key)
+		if strings.HasPrefix(envName, "$") {
+			if err := v.BindEnv(key, strings.TrimPrefix(envName, "$")); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
