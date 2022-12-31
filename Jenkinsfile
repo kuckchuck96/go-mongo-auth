@@ -11,7 +11,7 @@ pipeline {
         choice(name: 'ENV', choices: ['Dev', 'Prod'], description: 'Pick application environment')
     }
     environment {
-        appEnv = "$ENV"
+        appEnv = "$ENV".toLowerCase()
         appDir = "$appEnv/$BUILD_NUMBER/app"
         dockerHost = 'https://docker.io'
         dockerAuth = credentials('docker-hub-auth')
@@ -51,7 +51,6 @@ pipeline {
                 script {
                     try {
                         dir(appDir) {
-                            sh 'ls -ltra'
                             docker.withRegistry(dockerHost, dockerAuth) {
                                 def dockerImage = docker.build("go-mongo-auth:$GIT_COMMIT")
                             }
