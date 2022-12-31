@@ -5,3 +5,6 @@
 
 # Local configs
 *dev.yaml
+
+# Build
+cmd/build
