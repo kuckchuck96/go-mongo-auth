@@ -13,6 +13,7 @@ pipeline {
     environment {
         appEnv = "$ENV"
         appDir = "$appEnv/$BUILD_NUMBER/app"
+        dockerHost = 'https://docker.io'
     }
     stages {
         stage('Checkout') {
@@ -39,6 +40,22 @@ pipeline {
                         }
                     } catch(Exception ex) {
                         error("Error building project: $err")
+                        return
+                    }
+                }
+            }
+        }
+        stage('Create & Push Docker Image') {
+            steps {
+                script {
+                    try {
+                        dir(appDir) {
+                            docker.withRegistry(dockerHost, 'docker-hub-auth') {
+                                def dockerImage = docker.build("go-mongo-auth:$GIT_COMMIT")
+                            }
+                        }
+                    } catch(Exception ex) {
+                        error("Error building or pushing docker image: $err")
                         return
                     }
                 }
