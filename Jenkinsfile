@@ -25,7 +25,7 @@ pipeline {
                             checkout scm
                         }
                     } catch(Exception ex) {
-                        error("Error copying repository to $appDir: $err")
+                        error("Error copying repository to $appDir: $ex")
                         return
                     }
                 }
@@ -39,7 +39,7 @@ pipeline {
                             sh 'make build'
                         }
                     } catch(Exception ex) {
-                        error("Error building project: $err")
+                        error("Error building project: $ex")
                         return
                     }
                 }
@@ -55,7 +55,7 @@ pipeline {
                             }
                         }
                     } catch(Exception ex) {
-                        error("Error building or pushing docker image: $err")
+                        error("Error building or pushing docker image: $ex")
                         return
                     }
                 }
