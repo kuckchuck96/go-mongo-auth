@@ -6,3 +6,6 @@ lint:
 
 swag:
 	swag init -g ./cmd/go-mongo-auth/main.go
+
+build:
+	go build -o ./cmd/build ./cmd/go-mongo-auth/main.go
