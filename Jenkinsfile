@@ -52,7 +52,7 @@ pipeline {
                     try {
                         dir(appDir) {
                             docker.withRegistry(dockerHost, dockerAuth) {
-                                def dockerImage = docker.build("go-mongo-auth:$GIT_COMMIT")
+                                def dockerImage = docker.build("go-mongo-auth:${env.BUILD_ID}")
                             }
                         }
                     } catch(Exception ex) {
