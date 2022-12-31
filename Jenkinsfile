@@ -51,9 +51,10 @@ pipeline {
                 script {
                     try {
                         dir(appDir) {
-                            docker.withRegistry(dockerHost, dockerAuth) {
-                                def dockerImage = docker.build("go-mongo-auth:${env.BUILD_ID}")
-                            }
+                            // docker.withRegistry(dockerHost, dockerAuth) {
+                            //     def dockerImage = docker.build("go-mongo-auth:${env.BUILD_ID}")
+                            // }
+                            sh 'docker version'
                         }
                     } catch(Exception ex) {
                         error("Error building or pushing docker image: $ex")
