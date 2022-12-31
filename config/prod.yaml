@@ -1,3 +1,4 @@
+---
 app:
     name: go-mongo-auth
     env: prod
@@ -10,12 +11,12 @@ server:
     wait-time: 5s
 
 jwt:
-    signing-key: ${SECRET_KEY}
+    signing-key: $SECRET_KEY
     auth:
-        expiry: ${TOKEN_EXPIRY}
+        expiry: $TOKEN_EXPIRY
 
 mongo:
-    uri: ${MONGO_URI}
-    database: ${DATABASE_NAME}
-    timeout: ${CONNECTION_TIMEOUT}
-    context-timeout: ${CONTEXT_TIMEOUT}
+    uri: $MONGO_URI
+    database: $DATABASE_NAME
+    timeout: $CONNECTION_TIMEOUT
+    context-timeout: $CONTEXT_TIMEOUT
