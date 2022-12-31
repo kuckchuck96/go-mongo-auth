@@ -52,7 +52,8 @@ pipeline {
                     try {
                         dir(appDir) {
                             docker.withRegistry(dockerHost, dockerAuth) {
-                                def dockerImage = docker.build("go-mongo-auth:${env.BUILD_ID}")
+                                // def dockerImage = docker.build("go-mongo-auth:${env.BUILD_ID}")
+                                echo "Docker login"
                             }
                         }
                     } catch(Exception ex) {
