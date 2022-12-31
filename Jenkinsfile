@@ -30,5 +30,19 @@ pipeline {
                 }
             }
         }
+        stage('Build') {
+            steps {
+                script {
+                    try {
+                        dir(appDir) {
+                            sh 'make build'
+                        }
+                    } catch(Exception ex) {
+                        error("Error building project: $err")
+                        return
+                    }
+                }
+            }
+        }
     }
 }
