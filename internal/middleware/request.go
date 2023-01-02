@@ -20,7 +20,7 @@ type (
 	}
 )
 
-var _exclude = []string{"/login", "/register", "/swagger"}
+var _exclude = []string{"/login", "/register", "/swagger", "/health"}
 
 func requestValidation(m *middleware) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
